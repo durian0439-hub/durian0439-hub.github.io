@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="한강 UAM PSU·운항통제 LAB. 비행계획 접수, PSU 모의 검토, 패드 예약, PX4 모의비행과 관측 감시를 연결한 시스템의 실제 화면과 시연.">
+  <meta name="theme-color" content="#0b1822">
+  <meta property="og:title" content="UAM OPS LAB — PSU·운항통제 시스템">
+  <meta property="og:description" content="비행계획부터 기체 관측까지, 실제 구현 화면과 시연으로 만나는 UAM 운항관리 LAB.">
+  <meta property="og:type" content="website">
+  <title>UAM OPS LAB — PSU·운항통제 시스템</title>
+  <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">본문으로 건너뛰기</a>
+<header class="site-header">
+  <a class="brand" href="#top" aria-label="UAM OPS LAB 처음으로"><img src="assets/mark.svg" width="32" height="32" alt=""><span>UAM <b>OPS</b><small>PSU & FLIGHT OPERATIONS LAB</small></span></a>
+  <nav id="mainNav" aria-label="주요 메뉴"><a href="#overview">시스템 소개</a><a href="#workspaces">구현 화면</a><a href="#workflow">운항 흐름</a><a href="#demos">시연</a><a href="#decisions">선택 근거</a><a href="#references">출처·근거</a></nav>
+  <div class="header-tools"><button id="motionToggle" class="motion-toggle" aria-pressed="true" aria-label="애니메이션 끄기"><span class="motion-icon">Ⅱ</span><span class="motion-text">모션</span></button><a class="nav-cta" href="#workspaces">화면 둘러보기 <span>↗</span></a><button class="menu-toggle" id="menuToggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mainNav"><span></span><span></span></button></div>
+  <div class="reading-progress" aria-hidden="true"><i></i></div>
+</header>
+<main id="main">
+<section class="hero" id="top">
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="container hero-layout">
+    <div class="hero-copy">
+      <p class="eyebrow"><i></i> UAM PSU · 운항통제 시스템</p>
+      <h1>계획한 비행을,<br><span>보이는 운항으로.</span></h1>
+      <p class="hero-description">계획 접수와 PSU 모의 검토, 패드 예약부터<br class="desktop"> 모의기체의 비행과 관측 감시까지.<br class="desktop"> 한 편의 UAM 운항을 연결하는 시스템입니다.</p>
+      <div class="hero-actions"><a class="button primary" href="#workspaces">실제 구현 화면 보기 <span>↗</span></a><button class="button ghost" data-play="overview"><span class="play-icon">▶</span> 31초 시연</button></div>
+      <p class="hero-scope">한강을 배경으로 개발한 개인 LAB<br>Java · ROS 2 · PX4 · Gazebo · Cesium</p>
+    </div>
+    <div class="hero-product">
+      <div class="product-frame hero-frame" data-zoom="assets/altitude.png" data-caption="단일 PX4의 1,000ft급 정상 모의비행 감시 화면. 모형 고도 표시 / 2026.10.18" role="button" tabindex="0" aria-label="실제 관제 화면 크게 보기">
+        <div class="frame-top"><span><i></i> UAM OPS / HAN RIVER</span><span>실제 구현 화면 <b>↗</b></span></div>
+        <img class="hero-screen" src="assets/altitude.png" width="1437" height="804" alt="한강 지도 위 단일 PX4 기체의 약 999ft 모형 고도와 비행계획을 보여주는 실제 운항 감시 화면" fetchpriority="high">
+      </div>
+      <div class="floating-label fl-plan"><i></i><span>계획과 관측<br><b>같은 비행으로 연결</b></span></div>
+      <div class="floating-label fl-track"><span class="tiny-plane">✦</span><span>PX4 SITL → Cesium<br><b>모의기체 관측 표출</b></span></div>
+      <p class="asset-note">2026.10.18 실제 화면 캡처 · 실시간 운영 화면이 아닙니다.</p>
+    </div>
+  </div>
+  <div class="container hero-bottom"><span>EXPLORE THE SYSTEM <span class="down-arrow">↓</span></span><div><b>계획</b><i>→</i><b>검토·자원</b><i>→</i><b>실행</b><i>→</i><b>감시·기록</b></div><span>HAN RIVER / LOCAL SIMULATION</span></div>
+</section>
+
+<section class="section overview" id="overview">
+  <div class="container">
+    <div class="section-label reveal"><span>01 / THE SYSTEM</span><span>무엇을 위해 개발했나</span></div>
+    <div class="section-intro reveal"><h2>PSU의 운항 지원과<br>운항통제를 <em>하나의 흐름으로.</em></h2><p>계획이 수락됐다는 사실만으로 기체를 출발시킬 수는 없습니다. 공역·기상·패드의 현재 조건을 확인하고, 실제 기체가 계획대로 움직이는지 계속 살펴야 합니다. 이 시스템은 그 판단에 필요한 업무와 데이터를 연결합니다.</p></div>
+    <div class="purpose-grid">
+      <article class="purpose-panel reveal"><span class="panel-index">A</span><p class="eyebrow">PSU / 운항 지원</p><h3>어떤 비행을<br>어떤 조건에서 수용할까.</h3><p>운항자가 제출한 계획을 확인하고, PSU 역할의 모의 결정과 운영 조건 검토를 남깁니다. 계획 간 시간·경로 충돌과 제한 공역, 패드 가용성을 함께 다룹니다.</p><div class="purpose-tokens"><span>비행계획</span><span>모의 수락·반려</span><span>교통·자원 검토</span></div></article>
+      <article class="purpose-panel reveal"><span class="panel-index">B</span><p class="eyebrow">FLIGHT OPERATIONS / 운항통제</p><h3>출발할 수 있는가,<br>지금 어떻게 비행하는가.</h3><p>시설 사용 허가와 실행 위임, 출발 시각을 확인한 뒤 PX4 모의기체에 연결합니다. 수신한 위치와 고도를 지도에 표시하고, 자료 품질과 운항 상태를 확인합니다.</p><div class="purpose-tokens"><span>위임·출발</span><span>기체 연계</span><span>감시·이력</span></div></article>
+    </div>
+    <p class="scope-line reveal">PSU는 이 LAB에서 계획 검토와 운항 지원을 맡도록 구성한 역할입니다. 실제 기관의 운항 허가·안전 인증이나 상용 PSU 서비스와는 구분합니다.</p>
+    <p class="source-context reveal">역할 구분의 참고 자료 <a href="#ref-uam">[1] FAA UAM ConOps §4.3</a> · <a href="#ref-processing">[4] 비행자료·감시자료 처리</a></p>
+  </div>
+</section>
+
+<section class="section workspaces" id="workspaces">
+  <div class="container">
+    <div class="section-label reveal"><span>02 / PRODUCT TOUR</span><span>구현한 화면과 기능</span></div>
+    <div class="heading-row reveal"><h2>설명보다 먼저,<br><em>화면을 살펴보세요.</em></h2><p>직접 구현한 업무 화면입니다.<br>화면을 선택하고 이미지를 누르면<br>세부 내용을 크게 볼 수 있습니다.</p></div>
+    <div class="workspace-tabs reveal" role="tablist" aria-label="구현 화면 선택">
+      <button role="tab" aria-selected="true" aria-controls="workspacePanel" id="tab-monitor" data-workspace="monitor">운항 감시</button><button role="tab" aria-selected="false" aria-controls="workspacePanel" id="tab-plan" data-workspace="plan" tabindex="-1">계획 작성</button><button role="tab" aria-selected="false" aria-controls="workspacePanel" id="tab-psu" data-workspace="psu" tabindex="-1">PSU 검토</button><button role="tab" aria-selected="false" aria-controls="workspacePanel" id="tab-resource" data-workspace="resource" tabindex="-1">패드·예약</button><button role="tab" aria-selected="false" aria-controls="workspacePanel" id="tab-altitude" data-workspace="altitude" tabindex="-1">3D 고도</button><button role="tab" aria-selected="false" aria-controls="workspacePanel" id="tab-traffic" data-workspace="traffic" tabindex="-1">광역 교통</button><button role="tab" aria-selected="false" aria-controls="workspacePanel" id="tab-separation" data-workspace="separation" tabindex="-1">전략·전술</button><button role="tab" aria-selected="false" aria-controls="workspacePanel" id="tab-trace" data-workspace="trace" tabindex="-1">표본 추적</button>
+    </div>
+    <div class="workspace-panel reveal" role="tabpanel" id="workspacePanel" aria-labelledby="tab-monitor">
+      <div class="workspace-context"><div><span id="workspaceType" class="type-label">ACTUAL PROJECT SCREEN</span><h3 id="workspaceTitle">한강 운항 모니터링</h3><p id="workspaceDescription">계획·시설·수신 관측을 한강 지도에서 함께 보고, 선택한 비행의 위치와 상태를 확인합니다.</p></div><ul id="workspaceFeatures"><li>계획 선과 실제 관측 항적 구분</li><li>선택 기체의 위치·고도·방향 확인</li><li>자료 출처와 상세 표본으로 이동</li></ul><button id="workspaceZoom" class="text-button">화면 확대 <span>↗</span></button></div>
+      <div class="workspace-image-wrap"><button class="workspace-image-button" id="workspaceImageButton" aria-label="선택한 구현 화면 확대"><img id="workspaceImage" src="assets/monitor.jpg" width="1905" height="904" alt="실제 구현된 한강 운항 모니터링 화면" loading="lazy"><span class="zoom-badge">확대해서 보기 ↗</span></button><p id="workspaceCaption" class="asset-note">실제 PX4 관측을 다루는 LAB 화면 · 2026.10.18 캡처</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section workflow" id="workflow">
+  <div class="container">
+    <div class="section-label reveal"><span>03 / FLIGHT LIFECYCLE</span><span>한 편의 운항을 처리하는 방식</span></div>
+    <h2 class="reveal">계획을 작성한 순간부터,<br><em>비행을 마친 뒤까지.</em></h2>
+    <div class="workflow-layout">
+      <div class="workflow-sticky"><div class="workflow-visual"><div class="workflow-window-title"><span id="workflowCounter">01 / 05</span><span id="workflowScreenName">PLAN BUILDER</span></div><button id="workflowZoom" aria-label="운항 흐름의 현재 화면 확대"><img id="workflowImage" src="assets/planner.jpg" width="1905" height="904" alt="운항 흐름의 첫 단계인 실제 계획 작성 화면" loading="lazy"></button><div class="lifecycle-route"><span>LAB-A</span><svg viewBox="0 0 480 70" aria-hidden="true"><path d="M10 45C90 45 80 10 160 20S260 65 330 30S390 10 470 35"/><path class="route-progress" d="M10 45C90 45 80 10 160 20S260 65 330 30S390 10 470 35"/></svg><span>LAB-B</span></div><p class="asset-note">화면은 실제 캡처 / 아래 경로는 운항 흐름 설명용 도식</p></div></div>
+      <div class="workflow-steps">
+        <article class="workflow-step active" data-step="0"><span class="step-number">01</span><h3>시간이 있는 비행계획</h3><p>기체와 출·도착 시설을 고르고, 각 FIX의 위도·경도·고도·시각을 입력합니다. 초안에 GUFI를 발급하고 FF-ICE/FIXM XML을 검사해 접수합니다.</p><div class="step-meta">남는 정보 <span>초안 · 식별자 · 버전 · 제출 원문</span></div></article>
+        <article class="workflow-step" data-step="1"><span class="step-number">02</span><h3>모의 결정과 운항 검토</h3><p>PSU 화면에서 수락·반려와 사유를 기록합니다. 공역·기상·계획 간 충돌 검토는 별도로 수행하며, 검토한 조건의 버전도 남깁니다.</p><div class="step-meta">핵심 구분 <span>PSU 결정 ≠ 실제 출발</span></div></article>
+        <article class="workflow-step" data-step="2"><span class="step-number">03</span><h3>출발지와 도착지의 자원</h3><p>패드를 독립 자원으로 보고 시간창을 예약합니다. 예약·물리 점유·시설 허가를 구분하고, 도착 자원이 부족하면 출발지에만 새 예약이 남지 않도록 처리합니다.</p><div class="step-meta">남는 정보 <span>패드 · 시간창 · 시설 허가 · 자원 버전</span></div></article>
+        <article class="workflow-step" data-step="3"><span class="step-number">04</span><h3>위임한 계획을 모의비행으로</h3><p>명시적 실행 요청으로 PX4·Gazebo를 준비하고 출발 시각과 조건을 재확인합니다. Python 어댑터가 시간별 목표를 보내고 기체의 관측 위치를 받습니다.</p><div class="step-meta">핵심 구분 <span>명령 요청 · ACK · 실제 기체 상태</span></div></article>
+        <article class="workflow-step" data-step="4"><span class="step-number">05</span><h3>관측·종료·이력까지 연결</h3><p>관측을 ROS 2·CAT021 경로로 수신·저장하고 지도에 표시합니다. 정상 종료 때 착륙·시동 해제·실행 정리를 확인해 예약을 반환하고, 판단과 관측 이력은 보존합니다.</p><div class="step-meta">남는 정보 <span>관측 원문 · 상태·사유 · 종료·반환 이력</span></div></article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section demos" id="demos">
+  <div class="container">
+    <div class="section-label reveal"><span>04 / SEE IT IN MOTION</span><span>구현·실험 시연</span></div>
+    <div class="heading-row reveal"><h2>기체가 움직이면,<br><em>화면도 이어집니다.</em></h2><p>기존 프로젝트의 실제 화면과<br>관측 기록을 바탕으로 제작한 시연입니다.<br>재생 유형은 각 영상에 표시했습니다.</p></div>
+    <div class="theater reveal">
+      <div class="theater-player"><video id="demoVideo" controls playsinline preload="metadata" poster="assets/altitude.png" aria-describedby="demoDescription"><source src="assets/showcase.mp4" type="video/mp4">브라우저가 영상을 지원하지 않습니다. 아래 원본 다운로드를 이용해 주세요.</video><div class="theater-meta"><span id="demoKind">정지 렌더 + 관측 기록 재생 + 합성 교통</span><span id="demoDuration">31 SEC</span></div></div>
+      <div class="demo-list" aria-label="시연 영상 선택"><button data-demo="overview" class="active" aria-pressed="true"><span>01</span><div><b>시스템 한눈에 보기</b><small>Gazebo · PX4 항적 · Cesium</small></div><i>▶</i></button><button data-demo="track" aria-pressed="false"><span>02</span><div><b>저장된 PX4 항적</b><small>단일 기체 관측 기록 압축 재생</small></div><i>▶</i></button><button data-demo="gcs" aria-pressed="false"><span>03</span><div><b>GCS 연결 상실</b><small>heartbeat만 중단한 실행 기록</small></div><i>▶</i></button><button data-demo="offboard" aria-pressed="false"><span>04</span><div><b>Offboard 입력 상실</b><small>목표 위치 전송 중단 기록</small></div><i>▶</i></button><button data-demo="surveillance" aria-pressed="false"><span>05</span><div><b>감시 전달 중단</b><small>제어와 관측 전달 경로 분리</small></div><i>▶</i></button><button data-demo="goaround" aria-pressed="false"><span>06</span><div><b>복행·재접근</b><small>도착지 사용 불가 조건의 기록</small></div><i>▶</i></button><button data-demo="divert" aria-pressed="false"><span>07</span><div><b>대체 착륙</b><small>시험용 후보 선택·이동 기록</small></div><i>▶</i></button></div>
+    </div>
+    <div class="demo-description reveal"><div><p class="eyebrow" id="demoEyebrow">SYSTEM SHOWCASE</p><h3 id="demoTitle">시스템을 31초로 둘러보기</h3></div><p id="demoDescription">재질 검수용 Gazebo 정지 렌더, 단일 PX4의 저장 관측 압축 재생, 광역 운동학 합성 교통실험이 이어집니다. 실시간 Gazebo 연속 녹화나 실제 여러 기체의 동시 비행은 아닙니다.</p><a id="demoDownload" href="assets/showcase.mp4" download>영상 원본 ↓</a></div>
+  </div>
+</section>
+
+<section class="section decisions" id="decisions">
+  <div class="container">
+    <div class="section-label reveal"><span>05 / DESIGN DECISIONS</span><span>설계와 기술을 선택한 근거</span></div>
+    <div class="heading-row reveal"><h2>운항에서 생긴 질문을,<br><em>설계의 기준으로.</em></h2><p>목표는 단일 PC에서 한 편의 모의 운항을 끝까지 연결하고, 판단과 데이터의 근거를 확인하는 것이었습니다. 그 목표에서 무엇을 나눌지, 어떤 도구를 쓸지 정했습니다.</p></div>
+    <div class="decision-priorities reveal"><span>단일 기체의 전체 흐름</span><span>상태 변경의 책임</span><span>원 관측의 추적</span><span>실패 뒤의 복구</span></div>
+    <div class="decision-grid">
+      <article class="decision-card reveal" id="decision-state"><div class="decision-number">01 / OPERATIONAL STATE</div><h3>계획 수락과 출발을<br>왜 나눴는가</h3><p class="decision-problem">계획을 수락한 뒤 패드가 닫히거나 기상이 바뀌면, 이전 결정을 그대로 출발 허가로 사용할 수 없습니다.</p><dl><div><dt>단순하게 묶을 경우</dt><dd>하나의 승인 상태에 검토·예약·허가·출발을 담으면 어떤 판단을 철회해야 하는지 모호해집니다.</dd></div><div class="decision-chosen"><dt>선택과 이유</dt><dd>PSU 모의 결정·운항 검토·예약·시설 허가·위임·출발을 분리했습니다. 조건 변경 시 영향을 받는 위임을 무효화하고, 출발 시점에 다시 검사하기 위해서입니다.</dd></div></dl><div class="decision-evidence"><b>구현에서 확인한 근거</b><p>도착 패드 폐쇄 시 예약을 거절하고 출발지에만 예약이 남지 않는지 확인했습니다. 합성 WIND를 해제해도 철회한 위임은 자동으로 복원되지 않았습니다.</p><a href="#ref-uam">역할·자원 개념 [1] ↗</a><a href="https://durian9s-coding-tree.tistory.com/399" target="_blank" rel="noopener">설계 판단·시험 기록 ↗</a></div></article>
+      <article class="decision-card reveal" id="decision-provenance"><div class="decision-number">02 / PLAN &amp; OBSERVATION</div><h3>예정 경로와 관측을<br>왜 따로 다뤘는가</h3><p class="decision-problem">계획상 지나야 할 좌표가 화면에 움직인다는 사실만으로 기체가 그곳을 비행했다고 판단할 수는 없습니다.</p><dl><div><dt>구분하지 않을 경우</dt><dd>보간한 목표 위치와 실제 기체 위치, 늦게 도착한 관측과 현재 상태를 혼동할 수 있습니다.</dd></div><div class="decision-chosen"><dt>선택과 이유</dt><dd>제어 목표는 계획에서 계산하고 관측은 PX4 추정 위치에서 받았습니다. GUFI·실행 ID·표본 번호로 비행·실행·측정을 구분해 어느 경계에서 값이 달라졌는지 추적하도록 했습니다.</dd></div></dl><div class="decision-evidence"><b>구현에서 확인한 근거</b><p>30분 실행의 8,279개 표본을 원 관측·ROS·CAT021 원문·DB 값으로 대조했습니다. 선택 표본의 원천·변환·수신·저장을 화면에서 나란히 볼 수 있습니다.</p><a href="#data">표본 추적 화면 ↑</a><a href="#ref-processing">처리 역할의 사후 대조 [4] ↗</a></div></article>
+      <article class="decision-card reveal" id="decision-protocol"><div class="decision-number">03 / EXCHANGE FORMAT</div><h3>표준 형식과 실행 정보를<br>왜 나눠 담았는가</h3><p class="decision-problem">비행계획의 의미와 감시자료의 항목을 확인하려면 프로젝트 내부 필드만으로 설명하는 방식보다 대조할 기준이 필요했습니다.</p><dl><div><dt>임의 필드에 모두 담을 경우</dt><dd>계획·관측·실행 식별자의 의미가 섞이고, 어떤 항목이 규격에 속하는지 설명하기 어려워집니다.</dd></div><div class="decision-chosen"><dt>선택과 이유</dt><dd>계획은 FF-ICE/FIXM의 제한 프로필과 공식 XSD로 검사하고, 감시는 CAT021의 선택 항목으로 해석했습니다. GUFI·실행 ID·모형 고도는 별도 봉투에 두어 규격 필드의 의미를 바꾸지 않았습니다.</dd></div></dl><div class="decision-evidence"><b>구현에서 확인한 근거</b><p>제출 XML 원문과 CAT021 바이트를 보존해 파싱 결과와 대조합니다. 모형 기준면의 높이를 WGS-84 타원체 높이로 바꿔 설명하지 않았습니다.</p><a href="#ref-plan">계획 구조·스키마 [2] ↗</a><a href="#ref-surveillance">감시 항목·좌표 정의 [3] ↗</a></div></article>
+      <article class="decision-card reveal" id="decision-delivery"><div class="decision-number">04 / DELIVERY &amp; RECOVERY</div><h3>MQ 도입 전에 왜<br>outbox·ACK를 만들었는가</h3><p class="decision-problem">기체는 계속 움직이는데 Java 서버가 내려가자 위치 표본 198개가 DB에 저장되지 않았습니다. 송신 완료와 저장 완료는 달랐습니다.</p><dl><div><dt>브로커를 먼저 둘 경우</dt><dd>전달을 맡길 수 있지만 별도 운영 구성도 생깁니다. 첫 단계에서는 단일 기체의 생성→저장 경계를 직접 검증하는 데 범위를 맞췄습니다.</dd></div><div class="decision-chosen"><dt>선택과 이유</dt><dd>SQLite outbox에 먼저 보관하고 Java의 DB commit 뒤 ACK를 받도록 했습니다. 미확인 표본은 재전송하고 식별자·본문으로 중복과 충돌을 구분합니다. 이 선택으로 재시도·오류 격리·중복 처리를 직접 관리하는 부담도 맡았습니다.</dd></div></dl><div class="decision-evidence"><b>구현에서 확인한 근거</b><p>누락된 198개를 복구하고 재전송 뒤 저장 건수가 늘지 않는지 확인했습니다. 이는 해당 시험의 복구 근거이며 exactly-once 전달 보장으로 일반화하지 않습니다.</p><a href="https://www.rabbitmq.com/docs/reliability" target="_blank" rel="noopener">ACK·재전송·중복 비교 근거 ↗</a><a href="#project-evidence">복구 시험 기록 ↓</a></div></article>
+    </div>
+    <div class="technology-decisions reveal" id="technology-decisions"><div class="proof-heading"><div><p class="eyebrow">TOOLS FOLLOW THE REQUIREMENTS</p><h3>도구도 같은 기준으로 골랐습니다.</h3></div><a href="#architecture">연결 구조 보기 ↓</a></div>
+      <div class="technology-head"><span>선택한 도구</span><span>필요했던 일과 선택 이유</span><span>선택에 따라 맡은 조건</span></div>
+      <div class="technology-row"><h4>Java · Spring Boot</h4><p>계획·검토·예약·버전·이력을 한 업무 서비스에서 처리하고, 여러 상태 변경을 트랜잭션 경계 안에서 관리하기 위해 사용했습니다.</p><p>기체 제어 주기와 업무 처리는 분리하고 Python 어댑터와 명시적 실행 계약으로 연결했습니다.</p></div>
+      <div class="technology-row"><h4>H2 파일 DB · Flyway</h4><p>단일 PC에서 별도 DB 서버 없이 반복 실행하고, 재시작 뒤 데이터와 스키마 변경 이력을 함께 확인하는 구성에 맞췄습니다.</p><p>이 구성에서의 저장·재시작을 검증했습니다. 다른 DB보다 빠르다는 비교 결과를 선택 근거로 삼지 않았습니다.</p></div>
+      <div class="technology-row"><h4>Python · ROS 2</h4><p>모의기체 실행·관측 수집을 맡고, 발행과 별도 구독·변환 사이의 경계를 기록하기 위해 나눴습니다.</p><p>기체 명령은 MAVLink 경로입니다. ROS 2는 관측 전달 경계에 쓰며 PX4 DDS 명령 경로로 설명하지 않습니다.</p></div>
+      <div class="technology-row"><h4>PX4 SITL · Gazebo</h4><p>예정 좌표의 단순 재생을 넘어 모의기체가 만든 추정 위치와 동작을 받아 계획·관측·종료 상태를 대조하기 위해 선택했습니다.</p><p>모의 센서·월드 기준의 시험입니다. 영상에는 실제 모의비행 기록과 합성 교통을 구분해 표시합니다.</p></div>
+      <div class="technology-row"><h4>React · TypeScript · Cesium</h4><p>계획·검토 양식과 지리 좌표·고도 표출을 연결하고, 지도에서는 최소 정보를 보다가 선택한 비행의 세부 근거로 들어가게 구성했습니다.</p><p>계획선과 관측 항적, 자료 출처를 따로 표시하고 모형 고도의 기준을 함께 설명합니다.</p></div>
+      <div class="technology-row"><h4>Windows + WSL2</h4><p>사용하던 PC와 Linux 기반 ROS 2·Gazebo·PX4 실행 환경을 함께 쓰기 위한 선택입니다.</p><p>Java도 WSL2에서 실행하는 로컬 LAB입니다. 네트워크·시계·프로세스 종료 경계는 별도 검수 대상으로 다뤘습니다.</p></div>
+      <p class="technology-note">선택 이유는 기존 블로그의 ‘세 가지 문제와 설계 판단’, ‘도구와 실행 환경을 고른 이유’ 및 실제 구현 문서와 대조했습니다. 위 비교는 이 LAB의 목표·제약에 따른 판단이며 언어·DB·브로커 간 성능 우열을 측정한 결과가 아닙니다. <a href="https://durian9s-coding-tree.tistory.com/399" target="_blank" rel="noopener">선택 이유를 정리한 공개 기록 ↗</a></p>
+    </div>
+  </div>
+</section>
+
+<section class="section architecture" id="architecture">
+  <div class="container">
+    <div class="section-label reveal"><span>06 / CONNECTED BY DESIGN</span><span>화면 아래의 연결 구조</span></div>
+    <div class="heading-row reveal"><h2>계획은 기체로.<br><em>관측은 화면으로.</em></h2><p>업무 처리와 기체 연계를 나누고,<br>같은 비행·실행·관측을 따라<br>요청과 결과가 이어지도록 구성했습니다.</p></div>
+    <div class="system-diagram reveal" data-flow="command"><div class="flow-switch" role="group" aria-label="정보 흐름 선택"><button data-flow-select="command" aria-pressed="true">실행 요청 →</button><button data-flow-select="observation" aria-pressed="false">← 관측 전달</button></div><div class="diagram-nodes"><div class="diagram-node"><span>01 / WORKSPACE</span><h3>업무·감시 화면</h3><p>React · TypeScript<br>Cesium 2D / 3D</p></div><div class="diagram-wire"><i></i><i></i></div><div class="diagram-node"><span>02 / OPERATIONS</span><h3>운항 서비스</h3><p>Java · Spring Boot<br>계획·자원·실행 · H2</p></div><div class="diagram-wire"><i></i><i></i></div><div class="diagram-node"><span>03 / ADAPTER</span><h3>기체·관측 연계</h3><p>Python · ROS 2<br>SQLite outbox · CAT021</p></div><div class="diagram-wire"><i></i><i></i></div><div class="diagram-node"><span>04 / SIMULATOR</span><h3>모의기체·환경</h3><p>PX4 SITL · Gazebo<br>MAVLink 목표·관측</p></div></div><div class="flow-explanation"><span id="flowLabel">COMMAND / 실행 요청</span><p id="flowText">웹의 요청을 Java에서 검토하고, 실행 계약과 시각 게이트를 거쳐 Python 어댑터가 PX4에 목표를 보냅니다.</p></div></div>
+    <div class="architecture-facts reveal"><p><b>FF-ICE / FIXM</b><span>시간이 있는 비행계획의 제한 프로필</span></p><p><b>GUFI · 실행 ID · 표본 번호</b><span>비행·실행·관측을 구분하는 식별자</span></p><p><b>CAT021 부분집합 + 별도 봉투</b><span>위치 원문과 실행 메타데이터를 분리</span></p></div>
+  </div>
+</section>
+
+<section class="section provenance" id="data">
+  <div class="container provenance-grid">
+    <div class="provenance-copy reveal"><p class="eyebrow">FROM A DOT TO ITS ORIGIN</p><h2>지도 위 한 점에도<br><em>확인할 근거가 있습니다.</em></h2><p>위치가 보인다는 것과 그 위치를 믿을 수 있다는 것은 다릅니다. 선택한 표본의 출처·시각·변환·수신 원문·DB 값을 나란히 확인할 수 있게 만들었습니다.</p><div class="data-rules"><div><b>출처를 보존</b><span>원 관측과 변환값을 구분하고 같은 표본으로 대조</span></div><div><b>불확실성 표시</b><span>지연·누락·고도 기준 부족은 UNKNOWN</span></div><div><b>저장 확인 후 완료</b><span>outbox에 먼저 보관하고 DB commit ACK 확인</span></div></div><button class="text-button" data-zoom="assets/trace.jpg" data-caption="동일 실행·표본 번호로 출처와 변환·수신·저장을 비교하는 실제 화면">표본 추적 화면 확대 ↗</button></div>
+    <div class="provenance-visual reveal"><button data-zoom="assets/trace.jpg" data-caption="실제 관측 처리경로 확인 화면 / 2026.10.18" aria-label="실제 표본 추적 화면 크게 보기"><img src="assets/trace.jpg" width="1905" height="904" alt="PX4 위치, Python과 ROS 수신, CAT021 원문과 DB 대조를 보여주는 실제 화면" loading="lazy"></button><div class="data-breadcrumb"><span>PX4</span><i>→</i><span>ROS 2</span><i>→</i><span>CAT021</span><i>→</i><span>DB</span><i>→</i><span>지도</span></div><p class="asset-note">GUFI·보조 고도는 CAT021 밖의 메타데이터입니다.</p></div>
+  </div>
+</section>
+
+<section class="section evidence" id="scope">
+  <div class="container">
+    <div class="section-label reveal"><span>07 / IMPLEMENTED SCOPE</span><span>현재 구현과 확인한 범위</span></div>
+    <div class="heading-row reveal"><h2>실제 모의비행으로<br><em>연결을 확인했습니다.</em></h2><p>아래는 서로 다른 기존 실행의 결과입니다.<br>표본 수는 항공기 수나 시험 횟수가 아닙니다.</p></div>
+    <div class="evidence-grid reveal"><article><span>30분 단일 모의비행</span><strong>8,279<small>개</small></strong><p>위치 표본의 관측·ROS·DB 원문 대조</p></article><article><span>서버 장애 복구</span><strong>198<small>개</small></strong><p>누락 표본 복구·동일 표본 중복 저장 방지</p></article><article><span>비정상 상황 5종</span><strong>2,105<small>개</small></strong><p>단일 PX4 순차 시험·독립 ULog 대조</p></article><article><span>1,000ft급 정상 비행</span><strong>3,372<small>개</small></strong><p>전체 표본 전달·착륙·시동 해제·예약 반환</p></article></div>
+    <p class="source-context reveal">각 수치의 검증 방법과 기록은 <a href="#project-evidence">프로젝트 시험 근거 ↓</a>에서 확인할 수 있습니다.</p>
+    <div class="scope-details reveal"><details open><summary>구현한 기능 <span>+</span></summary><div class="scope-columns scope-single"><div><h4>현재 구현</h4><p>제한 FF-ICE 계획 접수, PSU 모의 결정, 운영 조건 검토, 패드 예약·허가, 단일 PX4 연계, 관측 저장·표출·추적, 회랑 감시와 전략·전술 자문, 복구·재전송.</p></div></div></details><details><summary>영상·모형·성능 수치의 해석 <span>+</span></summary><div class="scope-columns"><p>화면 캡처와 영상은 기존 프로젝트 자료입니다. 비정상 시연은 저고도 단일 PX4 실행 기록의 압축 재생입니다. 복행·대체 이동은 시험용 Offboard 동작이며 Java 자문 API와 자동 연결된 명령 기능이 아닙니다.</p><p>1,000ft는 모형 기준면 가정의 정상 시나리오 목표입니다. 10월 19일 저고도·20배 일정 압축 재검수는 640개 전체 전달과 관측→ACK p95 0.850초·p99 3.189초를 확인했으나 p99 목표를 넘어서 지연 판정은 REVIEW입니다. 서로 다른 시험·계측 경계의 직접 비교는 하지 않습니다.</p></div></details></div>
+  </div>
+</section>
+
+<section class="section references" id="references">
+  <div class="container">
+    <div class="section-label reveal"><span>08 / SOURCES &amp; EVIDENCE</span><span>출처와 검증 근거</span></div>
+    <div class="reference-heading reveal"><div><p class="eyebrow">FROM REFERENCES TO IMPLEMENTATION</p><h2>설계에 참고한 자료와,<br><em>구현으로 확인한 근거.</em></h2></div><p>공개 문헌에서 역할과 데이터 구조를 참고하고, 실제 동작은 개인 LAB의 화면·관측·시험 기록으로 확인했습니다. 각 자료가 설명하는 범위와 이 프로젝트에 적용한 내용을 함께 적었습니다.</p></div>
+    <div class="source-grid">
+      <article class="source-card reveal" id="ref-uam"><span class="source-id">[1] UAM ROLES / 2023</span><h3>PSU와 운항자, 버티포트의 역할</h3><p>FAA UAM ConOps v2.0 §4.3.2·§4.3.4·§4.3.7은 운항자·PSU·버티포트의 역할과 운항 의도·자원 가용성의 관계를 설명합니다.</p><p class="source-application"><b>프로젝트 연결</b>계획 검토, 패드 가용성, 운항자 실행 요청을 서로 다른 업무로 구성했습니다.</p><a href="https://www.faa.gov/sites/faa.gov/files/Urban-Air-Mobility-Concept-of-Operations-2.0.pdf#page=21" target="_blank" rel="noopener">FAA UAM ConOps v2.0 · §4.3 ↗</a></article>
+      <article class="source-card reveal" id="ref-plan"><span class="source-id">[2] FLIGHT INFORMATION / 4.3 &amp; 1.1</span><h3>비행계획의 구조와 메시지</h3><p>FIXM Core 4.3.0과 FF-ICE Message 1.1.0의 스키마·공식 설명서를 계획 교환 구조의 기준으로 사용했습니다.</p><p class="source-application"><b>프로젝트 연결</b>제한 FFP 프로필의 XML/XSD 검사, GUFI 식별, 시간별 FIX 입력과 제출 원문 보존에 적용했습니다.</p><a href="https://docs.fixm.aero/" target="_blank" rel="noopener">FIXM 공식 사용자 설명서 ↗</a><a href="https://www.fixm.aero/releases/FFICE-Msg-1.1.0/FIXM_Ffice_Message_v1.1.0_with_Core_v4.3.0_Schemas.zip" target="_blank" rel="noopener">Core 4.3 / Message 1.1 스키마 ZIP ↗</a></article>
+      <article class="source-card reveal" id="ref-surveillance"><span class="source-id">[3] SURVEILLANCE DATA / ED 2.7</span><h3>감시 원문과 좌표의 해석</h3><p>EUROCONTROL ASTERIX CAT021 ed2.7의 데이터 항목과 부호화 정의를 참고했습니다. WGS-84 위치 항목은 §5.2.18·§5.2.19에서 확인할 수 있습니다.</p><p class="source-application"><b>프로젝트 연결</b>선택한 CAT021 부분집합의 송수신 원문과 DB 값을 대조했습니다. GUFI·실행 ID·보조 고도는 별도 봉투의 메타데이터입니다.</p><a href="https://www.eurocontrol.int/sites/default/files/2025-07/asterix-adsbtr-cat021-part12-v2-7.pdf#page=55" target="_blank" rel="noopener">CAT021 ed2.7 · 위치 항목 ↗</a></article>
+      <article class="source-card reveal" id="ref-processing"><span class="source-id">[4] FLIGHT &amp; SURVEILLANCE PROCESSING</span><h3>계획 처리와 관측 처리의 구분</h3><p>EUROCONTROL FDPS Guidance v1.0(2024)와 ARTAS 공식 기능 설명을 구현 뒤 대조한 참고 자료입니다.</p><p class="source-application"><b>프로젝트 연결</b>비행계획 처리와 기체 관측 처리를 나누고, 같은 비행으로 연결해 계획과 실제 움직임을 비교했습니다.</p><a href="https://www.eurocontrol.int/publication/eurocontrol-guidance-material-flight-data-processing-system-fdps" target="_blank" rel="noopener">FDPS Guidance v1.0 ↗</a><a href="https://www.eurocontrol.int/product/artas" target="_blank" rel="noopener">ARTAS 공개 기능 설명 ↗</a></article>
+      <article class="source-card reveal" id="ref-simulation"><span class="source-id">[5] SIMULATOR / PX4 V1.17</span><h3>모의기체와 실행 환경</h3><p>실행 환경과 같은 PX4 v1.17의 Gazebo Simulation 문서를 기준으로 모의비행과 기체 연계를 구성했습니다.</p><p class="source-application"><b>프로젝트 연결</b>Python의 목표 위치 전달, PX4 관측 수집, 착륙·시동 해제 확인을 실제 모의기체 기록과 대조했습니다.</p><a href="https://docs.px4.io/v1.17/en/sim_gazebo_gz/" target="_blank" rel="noopener">PX4 v1.17 · Gazebo Simulation ↗</a></article>
+      <article class="source-card reveal" id="ref-offnominal"><span class="source-id">[6] OFF-NOMINAL SCENARIOS / 2024</span><h3>비정상 상황의 시험 관점</h3><p>NASA High Density Vertiplex 비행시험 논문의 시나리오와 FAA UAM ConOps §6.1의 자원 확인 흐름을 참고했습니다.</p><p class="source-application"><b>프로젝트 연결</b>연결 상실·감시 전달 중단·복행·대체 착륙을 조건별로 나누고, 기체 반응과 관측 전달을 따로 확인했습니다.</p><a href="https://ntrs.nasa.gov/citations/20230017864" target="_blank" rel="noopener">NASA HDV · AIAA SciTech 2024 ↗</a><a href="https://www.faa.gov/sites/faa.gov/files/Urban-Air-Mobility-Concept-of-Operations-2.0.pdf" target="_blank" rel="noopener">FAA UAM ConOps · §6.1 ↗</a></article>
+    </div>
+    <p class="reference-scope reveal">문헌은 설계·대조의 참고 자료이며, 아래 수치는 이 프로젝트의 자체 시험 결과입니다. 한국 UAM 공통 의무 규격이나 ARTAS 코드·알고리즘을 적용했다는 의미로 사용하지 않았습니다.</p>
+    <div class="project-evidence reveal" id="project-evidence"><div class="proof-heading"><div><p class="eyebrow">PROJECT TEST RECORDS</p><h3>수치 뒤의 검증 방법</h3></div><a href="https://durian9s-coding-tree.tistory.com/399" target="_blank" rel="noopener">공개 프로젝트 기록 전체 보기 ↗</a></div>
+      <div class="proof-row"><span>30분 · 단일 PX4</span><strong>8,279개 표본</strong><p>원 관측·ROS 기록·CAT021 원문·DB 값을 같은 표본으로 대조했습니다.</p><a href="#demos">항적 시연 ↑</a></div>
+      <div class="proof-row"><span>서버 장애 복구</span><strong>198개 복구</strong><p>빠진 표본을 원본과 대조해 복구하고 재전송 뒤 저장 건수가 증가하지 않는지 확인했습니다.</p><a href="#data">추적 화면 ↑</a></div>
+      <div class="proof-row"><span>비정상 상황 5종</span><strong>2,105개 표본</strong><p>단일 PX4로 순차 시험하고 ROS·CAT021·DB 대사와 독립 ULog로 반응·경로를 확인했습니다.</p><a href="#demos">시험 시연 ↑</a></div>
+      <div class="proof-row"><span>1,000ft급 정상 비행</span><strong>3,372개 표본</strong><p>전체 표본 전달, 착륙·시동 해제, 실행 정리와 예약 반환을 확인한 별도 실행입니다.</p><a href="#workspaces">실제 화면 ↑</a></div>
+      <p class="proof-note">공개 기록에는 개발 의도·시험 결과·참고 문헌과 각 영상의 재생 유형이 정리돼 있습니다. 화면과 시험은 2026년 10월의 개인 LAB 기록이며 실제 운항 허가·안전 인증을 의미하지 않습니다.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site-footer"><div class="container"><a class="brand" href="#top"><img src="assets/mark.svg" width="32" height="32" alt=""><span>UAM <b>OPS</b><small>PSU & FLIGHT OPERATIONS LAB</small></span></a><div><p>개인 프로젝트 · Windows / WSL2 로컬 모의환경 · 2026.10</p><p>지도 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors / ODbL</a> · <a href="https://github.com/CesiumGS/cesium/blob/main/LICENSE.md" target="_blank" rel="noopener">CesiumJS</a> · <a href="https://github.com/PX4/PX4-Autopilot/blob/v1.17.0/LICENSE" target="_blank" rel="noopener">PX4</a></p><p>요구사항·설계·결과 검토는 프로젝트 작성자가 주도했고 코드·시험·문서·이 페이지 제작에는 ChatGPT/Codex를 활용했습니다.</p></div><a class="back-top" href="#top" aria-label="맨 위로">↑</a></div></footer>
+
+<dialog id="mediaDialog" aria-labelledby="dialogTitle"><div class="dialog-toolbar"><div><span id="dialogKicker">PROJECT SCREEN</span><h2 id="dialogTitle">구현 화면</h2></div><div class="dialog-buttons"><button id="dialogPrev" aria-label="이전 화면">←</button><button id="dialogNext" aria-label="다음 화면">→</button><button id="dialogClose" aria-label="확대 화면 닫기">닫기 ×</button></div></div><div id="dialogContent"></div><p id="dialogCaption"></p></dialog>
+<noscript><style>.reveal{opacity:1!important;transform:none!important}.workflow-step{opacity:1!important}</style><div class="noscript-note">JavaScript를 켜면 화면 전환과 확대 보기를 사용할 수 있습니다. 실제 화면과 영상·설명은 아래에서 확인할 수 있습니다.</div></noscript>
+</body>
+</html>
