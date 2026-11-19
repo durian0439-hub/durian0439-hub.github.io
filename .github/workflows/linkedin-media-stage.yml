@@ -2,7 +2,7 @@ name: Stage approved LinkedIn thumbnails
 
 on:
   issues:
-    types: [opened, edited]
+    types: [opened, edited, reopened]
 
 permissions:
   contents: write
